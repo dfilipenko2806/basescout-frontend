@@ -41,7 +41,7 @@ export default function Predictions() {
           let userPlayed = false;
           let userChoice;
 
-          // Проверяем сыграл ли пользователь
+          // Проверяем сыграл ли пользователь только если кошелёк подключен
           if (wallet?.address) {
             try {
               userPlayed = await contract.played(wallet.address, p.contractId);
@@ -75,7 +75,8 @@ export default function Predictions() {
             } else {
               status = "Resolved";
             }
-          } else if (userPlayed) {
+          } else if (wallet?.address && userPlayed) {
+            // Статус Waiting только если кошелёк подключен
             status = "Waiting";
           }
 
@@ -179,7 +180,7 @@ export default function Predictions() {
                     : `Ends in: ${getTimeLeft(p.endDate)}`}
                 </div>
 
-                {!p.userPlayed && !p.resolved && (
+                {!p.userPlayed && !p.resolved && wallet?.address && (
                   <div className="flex gap-4">
                     <button
                       disabled={txLoading}
