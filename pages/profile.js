@@ -33,6 +33,7 @@ export default function Profile() {
       setProfile({ ...profileData, badges: profileData.badges || [] });
       setNickname(profileData.nickname || "");
       setHistory(historyData || []);
+      setAvatarPreview(profileData.avatar || null);
     } catch (e) {
       console.log("Profile load error", e);
     }
@@ -41,31 +42,35 @@ export default function Profile() {
   async function saveProfile() {
     try {
       setSaving(true);
-      let avatarUrl = profile.avatar;
+      let avatarUrl = profile.avatar || "";
 
       if (avatar) {
         const form = new FormData();
         form.append("file", avatar);
-        const upload = await fetch(`${BACKEND}/upload-avatar`, { method: "POST", body: form });
-        const data = await upload.json();
-        avatarUrl = data.url;
+        const uploadRes = await fetch(`${BACKEND}/upload-avatar`, { method: "POST", body: form });
+        const uploadData = await uploadRes.json();
+        if (uploadData.url) avatarUrl = uploadData.url;
       }
 
-      await fetch(`${BACKEND}/profile`, {
+      const res = await fetch(`${BACKEND}/profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address: wallet.address, nickname, avatar: avatarUrl })
       });
 
+      if (!res.ok) throw new Error("Update failed");
+
       setEditOpen(false);
       setAvatar(null);
-      setAvatarPreview(null);
+      setAvatarPreview(avatarUrl);
 
       await loadProfile();
-    } catch {
-      alert("Update failed");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update profile");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   function handleAvatar(e) {
@@ -108,7 +113,7 @@ export default function Profile() {
         <div className="bg-zinc-900 p-6 rounded-xl mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img src={profile.avatar || "/default-avatar.png"} className="w-16 h-16 rounded-full object-cover"/>
+              <img src={avatarPreview || "/default-avatar.png"} className="w-16 h-16 rounded-full object-cover"/>
               <div>
                 <div className="text-xl font-bold">{profile.nickname || "Anonymous"}</div>
                 <div className="text-zinc-400 text-sm break-all">{wallet.address}</div>
