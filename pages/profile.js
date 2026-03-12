@@ -157,6 +157,28 @@ export default function Profile() {
           </div>
         </div>
 
+        {/* REFERRAL */}
+        <div className="bg-zinc-900 p-6 rounded-xl mb-8">
+          <h2 className="text-xl font-semibold mb-4">Referral</h2>
+          <div className="flex items-center gap-4">
+            <input
+              type="text"
+              readOnly
+              value={`https://basescout2026.vercel.app/?ref=${wallet.address}`}
+              className="flex-1 bg-zinc-800 px-3 py-2 rounded text-sm text-zinc-400"
+            />
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(`https://basescout2026.vercel.app/?ref=${wallet.address}`);
+                alert("Referral link copied!");
+              }}
+              className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Copy link
+            </button>
+          </div>
+        </div>
+
         {/* POINT HISTORY */}
         <div className="bg-zinc-900 p-6 rounded-xl">
           <h2 className="text-xl font-semibold mb-4">Points History</h2>
