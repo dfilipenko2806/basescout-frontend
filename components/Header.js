@@ -12,6 +12,7 @@ export default function Header() {
     <header className="bg-zinc-900 border-b border-zinc-800">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
 
+        {/* Левый блок: название + документация */}
         <div className="flex items-center gap-6">
           <Link href="/">
             <span className="text-xl font-bold cursor-pointer">
@@ -19,11 +20,17 @@ export default function Header() {
             </span>
           </Link>
 
+          {/* Ссылка на документацию */}
+          <Link href="/documentation">
+            <span className="text-zinc-400 hover:text-white cursor-pointer text-sm">
+              Documentation
+            </span>
+          </Link>
         </div>
 
+        {/* Правый блок: профиль / кошелек */}
         {wallet ? (
           <div className="flex items-center gap-4">
-
             <Link href="/profile">
               <span className="text-zinc-400 hover:text-white cursor-pointer">
                 Profile
@@ -40,7 +47,6 @@ export default function Header() {
             >
               Disconnect
             </button>
-
           </div>
         ) : (
           <button
