@@ -214,24 +214,41 @@ export default function Profile() {
         </div>
 
         {/* BADGES */}
-        <div className="bg-zinc-900 p-6 rounded-xl mb-8">
-          <h2 className="text-xl font-semibold mb-4">Badges</h2>
+        {/* BADGES */}
+<div className="bg-zinc-900 p-6 rounded-xl mb-8">
+  <h2 className="text-xl font-semibold mb-4">Badges</h2>
 
-          <div className="flex gap-3 flex-wrap">
-            {profile.badges.length === 0 ? (
-              <div className="text-zinc-400">No badges yet</div>
-            ) : (
-              profile.badges.map((b, i) => (
-                <div
-                  key={i}
-                  className="bg-yellow-500 text-black px-3 py-1 rounded"
-                >
-                  Badge {b}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+  <div className="flex gap-3 flex-wrap">
+    {profile.badges.length === 0 ? (
+      <div className="text-zinc-400">No badges yet</div>
+    ) : (
+      profile.badges.map((b, i) => {
+        // маппинг номера бейджа в картинку
+        const badgeImages = {
+          1: "https://gateway.pinata.cloud/ipfs/bafybeicgavnhwcixxryqg2sidq4shzz7b463xpvakojlcpns6obhczffjq/1.png",
+          2: "https://gateway.pinata.cloud/ipfs/bafybeicgavnhwcixxryqg2sidq4shzz7b463xpvakojlcpns6obhczffjq/2.png",
+          3: "https://gateway.pinata.cloud/ipfs/bafybeicgavnhwcixxryqg2sidq4shzz7b463xpvakojlcpns6obhczffjq/3.png",
+          4: "https://gateway.pinata.cloud/ipfs/bafybeicgavnhwcixxryqg2sidq4shzz7b463xpvakojlcpns6obhczffjq/4.png",
+          5: "https://gateway.pinata.cloud/ipfs/bafybeicgavnhwcixxryqg2sidq4shzz7b463xpvakojlcpns6obhczffjq/5.png",
+          6: "https://gateway.pinata.cloud/ipfs/bafybeicgavnhwcixxryqg2sidq4shzz7b463xpvakojlcpns6obhczffjq/6.png",
+          7: "https://gateway.pinata.cloud/ipfs/bafybeicgavnhwcixxryqg2sidq4shzz7b463xpvakojlcpns6obhczffjq/7.png",
+          8: "https://gateway.pinata.cloud/ipfs/bafybeicgavnhwcixxryqg2sidq4shzz7b463xpvakojlcpns6obhczffjq/8.png",
+          9: "https://gateway.pinata.cloud/ipfs/bafybeicgavnhwcixxryqg2sidq4shzz7b463xpvakojlcpns6obhczffjq/9.png",
+        };
+
+        return (
+          <img
+            key={i}
+            src={badgeImages[b] || "/default-badge.png"}
+            alt={`Badge ${b}`}
+            title={`Badge ${b}`}
+            className="w-12 h-12 rounded"
+          />
+        );
+      })
+    )}
+  </div>
+</div>
 
         {/* REFERRAL */}
         <div className="bg-zinc-900 p-6 rounded-xl mb-8">
