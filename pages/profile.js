@@ -19,6 +19,22 @@ export default function Profile() {
 
   useEffect(() => {
     if (!wallet) return;
+
+    const ref = new URLSearchParams(window.location.search).get("ref");
+
+    if (ref) {
+      fetch(`${BACKEND}/referral/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          address: wallet.address,
+          referrer: ref
+        })
+      }).catch(() => {});
+    }
+
     loadProfile();
   }, [wallet]);
 
@@ -42,20 +58,39 @@ export default function Profile() {
   async function saveProfile() {
     try {
       setSaving(true);
+
       let avatarUrl = profile.avatar || "";
 
       if (avatar) {
         const form = new FormData();
         form.append("file", avatar);
-        const uploadRes = await fetch(`${BACKEND}/upload-avatar`, { method: "POST", body: form });
+
+        const uploadRes = await fetch(`${BACKEND}/upload-avatar`, {
+          method: "POST",
+          body: form
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error("Avatar upload failed");
+        }
+
         const uploadData = await uploadRes.json();
-        if (uploadData.url) avatarUrl = uploadData.url;
+
+        if (!uploadData.url) {
+          throw new Error("Invalid upload response");
+        }
+
+        avatarUrl = uploadData.url;
       }
 
       const res = await fetch(`${BACKEND}/profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: wallet.address, nickname, avatar: avatarUrl })
+        body: JSON.stringify({
+          address: wallet.address,
+          nickname,
+          avatar: avatarUrl
+        })
       });
 
       if (!res.ok) throw new Error("Update failed");
@@ -65,6 +100,7 @@ export default function Profile() {
       setAvatarPreview(avatarUrl);
 
       await loadProfile();
+
     } catch (err) {
       console.error(err);
       alert("Failed to update profile");
@@ -76,8 +112,17 @@ export default function Profile() {
   function handleAvatar(e) {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 2_000_000) { alert("File too large (max 2MB)"); return; }
-    if (!file.type.startsWith("image/")) { alert("Invalid file type"); return; }
+
+    if (file.size > 2_000_000) {
+      alert("File too large (max 2MB)");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      alert("Invalid file type");
+      return;
+    }
+
     setAvatar(file);
     setAvatarPreview(URL.createObjectURL(file));
   }
@@ -107,49 +152,80 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white py-12 px-6">
       <div className="max-w-3xl mx-auto">
-        <Link href="/"><button className="mb-6 bg-zinc-800 px-4 py-2 rounded-lg hover:bg-zinc-700">← Back to Home</button></Link>
+
+        <Link href="/">
+          <button className="mb-6 bg-zinc-800 px-4 py-2 rounded-lg hover:bg-zinc-700">
+            ← Back to Home
+          </button>
+        </Link>
 
         {/* PROFILE CARD */}
         <div className="bg-zinc-900 p-6 rounded-xl mb-8">
           <div className="flex items-center justify-between">
+
             <div className="flex items-center gap-4">
-              <img src={avatarPreview || "/default-avatar.png"} className="w-16 h-16 rounded-full object-cover"/>
+              <img
+                src={avatarPreview || "/default-avatar.png"}
+                className="w-16 h-16 rounded-full object-cover"
+              />
+
               <div>
-                <div className="text-xl font-bold">{profile.nickname || "Anonymous"}</div>
-                <div className="text-zinc-400 text-sm break-all">{wallet.address}</div>
+                <div className="text-xl font-bold">
+                  {profile.nickname || "Anonymous"}
+                </div>
+                <div className="text-zinc-400 text-sm break-all">
+                  {wallet.address}
+                </div>
               </div>
             </div>
-            <button onClick={() => setEditOpen(true)} className="bg-blue-600 px-4 py-2 rounded-lg">Edit Profile</button>
+
+            <button
+              onClick={() => setEditOpen(true)}
+              className="bg-blue-600 px-4 py-2 rounded-lg"
+            >
+              Edit Profile
+            </button>
+
           </div>
+
           <div className="grid grid-cols-4 gap-4 mt-6">
+
             <div className="text-center">
               <div className="text-xl font-bold">{profile.points}</div>
               <div className="text-xs text-zinc-400">Points</div>
             </div>
+
             <div className="text-center">
               <div className="text-xl font-bold">{profile.streak}</div>
               <div className="text-xs text-zinc-400">Streak</div>
             </div>
+
             <div className="text-center">
               <div className="text-xl font-bold">{profile.referralsCount || 0}</div>
               <div className="text-xs text-zinc-400">Referrals</div>
             </div>
+
             <div className="text-center">
               <div className="text-xl font-bold">{profile.predictionsWon || 0}</div>
               <div className="text-xs text-zinc-400">Predictions</div>
             </div>
+
           </div>
         </div>
 
         {/* BADGES */}
         <div className="bg-zinc-900 p-6 rounded-xl mb-8">
           <h2 className="text-xl font-semibold mb-4">Badges</h2>
+
           <div className="flex gap-3 flex-wrap">
             {profile.badges.length === 0 ? (
               <div className="text-zinc-400">No badges yet</div>
             ) : (
               profile.badges.map((b, i) => (
-                <div key={i} className="bg-yellow-500 text-black px-3 py-1 rounded">
+                <div
+                  key={i}
+                  className="bg-yellow-500 text-black px-3 py-1 rounded"
+                >
                   Badge {b}
                 </div>
               ))
@@ -160,67 +236,135 @@ export default function Profile() {
         {/* REFERRAL */}
         <div className="bg-zinc-900 p-6 rounded-xl mb-8">
           <h2 className="text-xl font-semibold mb-4">Referral</h2>
+
           <div className="flex items-center gap-4">
+
             <input
               type="text"
               readOnly
               value={`https://basescout2026.vercel.app/?ref=${wallet.address}`}
               className="flex-1 bg-zinc-800 px-3 py-2 rounded text-sm text-zinc-400"
             />
+
             <button
               onClick={() => {
-                navigator.clipboard.writeText(`https://basescout2026.vercel.app/?ref=${wallet.address}`);
+                navigator.clipboard.writeText(
+                  `https://basescout2026.vercel.app/?ref=${wallet.address}`
+                );
                 alert("Referral link copied!");
               }}
               className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
             >
               Copy link
             </button>
+
           </div>
         </div>
 
         {/* POINT HISTORY */}
         <div className="bg-zinc-900 p-6 rounded-xl">
-          <h2 className="text-xl font-semibold mb-4">Points History</h2>
+
+          <h2 className="text-xl font-semibold mb-4">
+            Points History
+          </h2>
+
           <div className="space-y-3">
+
             {history.length === 0 ? (
-              <div className="text-zinc-400 text-sm">No history yet</div>
+              <div className="text-zinc-400 text-sm">
+                No history yet
+              </div>
             ) : (
               history.map((h, i) => (
-                <div key={i} className="flex justify-between border-b border-zinc-800 pb-2 text-sm text-zinc-400">
+                <div
+                  key={i}
+                  className="flex justify-between border-b border-zinc-800 pb-2 text-sm text-zinc-400"
+                >
                   <div>{formatDate(h.createdAt)}</div>
-                  <div className="text-green-400 font-semibold">+{h.points}</div>
+                  <div className="text-green-400 font-semibold">
+                    +{h.points}
+                  </div>
                 </div>
               ))
             )}
+
           </div>
         </div>
 
         {/* EDIT PROFILE MODAL */}
         {editOpen && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+
             <div className="bg-zinc-900 p-8 rounded-xl w-full max-w-md">
+
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold">Edit Profile</h2>
-                <button onClick={() => setEditOpen(false)} className="text-zinc-400">✕</button>
+                <button
+                  onClick={() => setEditOpen(false)}
+                  className="text-zinc-400"
+                >
+                  ✕
+                </button>
               </div>
+
               <div className="space-y-5">
+
                 <div>
-                  <label className="text-sm text-zinc-400">Nickname</label>
-                  <input value={nickname} onChange={(e) => setNickname(e.target.value)} className="w-full mt-1 bg-zinc-800 px-3 py-2 rounded"/>
+                  <label className="text-sm text-zinc-400">
+                    Nickname
+                  </label>
+
+                  <input
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    className="w-full mt-1 bg-zinc-800 px-3 py-2 rounded"
+                  />
                 </div>
+
                 <div>
-                  <label className="text-sm text-zinc-400 block mb-2">Avatar</label>
-                  {avatarPreview && <img src={avatarPreview} className="w-16 h-16 rounded-full mb-3 object-cover"/>}
+
+                  <label className="text-sm text-zinc-400 block mb-2">
+                    Avatar
+                  </label>
+
+                  {avatarPreview && (
+                    <img
+                      src={avatarPreview}
+                      className="w-16 h-16 rounded-full mb-3 object-cover"
+                    />
+                  )}
+
                   <label className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded cursor-pointer inline-block">
                     Upload Avatar
-                    <input type="file" accept="image/*" onChange={handleAvatar} className="hidden"/>
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatar}
+                      className="hidden"
+                    />
                   </label>
-                  {avatar && <div className="text-xs text-zinc-400 mt-2">{avatar.name}</div>}
+
+                  {avatar && (
+                    <div className="text-xs text-zinc-400 mt-2">
+                      {avatar.name}
+                    </div>
+                  )}
+
                 </div>
-                <button onClick={saveProfile} disabled={saving} className="w-full bg-blue-600 py-3 rounded-lg">Save Changes</button>
+
+                <button
+                  onClick={saveProfile}
+                  disabled={saving}
+                  className="w-full bg-blue-600 py-3 rounded-lg"
+                >
+                  Save Changes
+                </button>
+
               </div>
+
             </div>
+
           </div>
         )}
 
