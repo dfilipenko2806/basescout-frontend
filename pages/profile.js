@@ -129,7 +129,7 @@ export default function Profile() {
 
   function formatDate(dateStr) {
     const d = new Date(dateStr);
-    return d.toLocaleString("ru-RU", {
+    return d.toLocaleString("en-US", {
       day: "numeric",
       month: "long",
       hour: "2-digit",
