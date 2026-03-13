@@ -242,7 +242,7 @@ export default function Profile() {
             src={badgeImages[b] || "/default-badge.png"}
             alt={`Badge ${b}`}
             title={`Badge ${b}`}
-            className="w-12 h-12 rounded"
+            className="w-28 h-28 rounded"
           />
         );
       })
