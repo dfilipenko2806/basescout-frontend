@@ -43,7 +43,7 @@ export default function Home() {
       "I just joined BaseScout 🚀 Earn points, badges and climb the leaderboard!";
 
     const url =
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=https://basescout2026.vercel.app`;
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=http://basescout2026.xyz`;
 
     window.open(url, "_blank");
 
