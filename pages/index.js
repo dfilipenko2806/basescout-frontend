@@ -56,7 +56,7 @@ export default function Home() {
       <div className="max-w-4xl mx-auto">
 
         <h1 className="text-4xl font-bold text-center mb-4 flex items-center justify-center gap-2">
-          <img src="/favicon.png" alt="BaseScout Icon" className="w-8 h-8" />
+          <img src="/favicon.png" alt="BaseScout Icon" className="w-16 h-16" />
           BaseScout
         </h1>
 
