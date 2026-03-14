@@ -87,6 +87,24 @@ export default function Documentation() {
           </p>
         </section>
 
+        {/* Active Users Rewards */}
+        <section className="bg-zinc-900 p-10 rounded-xl">
+          <h2 className="text-3xl font-bold mb-6">Active Users Rewards</h2>
+          <p className="text-zinc-300 mb-4">
+            BaseScout dedicates <strong>30% of the project’s economy</strong> to reward its most active users. 
+            These rewards are distributed transparently and consistently, providing tangible incentives for engagement.
+          </p>
+          <ul className="list-disc list-inside text-zinc-300 space-y-3">
+            <li>Daily check-ins and milestone achievements</li>
+            <li>Participation in social tasks and community challenges</li>
+            <li>Successful predictions and gamified mini-games</li>
+            <li>Seasonal competitions and top-user leaderboards</li>
+          </ul>
+          <p className="text-zinc-300 mt-4">
+            This reward mechanism not only drives user retention and activity but also helps create a loyal, vibrant community within Base.
+          </p>
+        </section>
+
         {/* Investment & Opportunities */}
         <section className="bg-zinc-900 p-10 rounded-xl">
           <h2 className="text-3xl font-bold mb-6">Investment & Opportunities</h2>
