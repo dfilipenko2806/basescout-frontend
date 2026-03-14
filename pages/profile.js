@@ -17,6 +17,8 @@ export default function Profile() {
 
   const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+  const REFERRAL_BASE = "https://basescout2026.xyz";
+
   useEffect(() => {
     if (!wallet) return;
 
@@ -255,8 +257,6 @@ export default function Profile() {
           <h2 className="text-xl font-semibold mb-4">Referral</h2>
 
           <div className="flex items-center gap-4">
-
-            const REFERRAL_BASE = "https://basescout2026.xyz";
 
             <input
               type="text"
