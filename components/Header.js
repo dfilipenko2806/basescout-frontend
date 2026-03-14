@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useWallet } from "../context/WalletContext";
-import Head from "next/head"; // <- импортируем Head для favicon
+import Head from "next/head"; // для favicon
 
 export default function Header() {
   const { wallet, connect, disconnect } = useWallet();
@@ -23,9 +23,14 @@ export default function Header() {
           {/* Левый блок: название + документация + bug report */}
           <div className="flex items-center gap-6">
             <Link href="/">
-              <span className="text-xl font-bold cursor-pointer">
-                🚀 BaseScout
-              </span>
+              <div className="flex items-center gap-2 cursor-pointer">
+                <img
+                  src="/favicon.png"
+                  alt="BaseScout Icon"
+                  className="w-6 h-6"
+                />
+                <span className="text-xl font-bold">BaseScout</span>
+              </div>
             </Link>
 
             <Link href="/documentation">
@@ -54,9 +59,7 @@ export default function Header() {
                 </span>
               </Link>
 
-              <span className="text-sm text-zinc-400">
-                {short(wallet.address)}
-              </span>
+              <span className="text-sm text-zinc-400">{short(wallet.address)}</span>
 
               <button
                 onClick={disconnect}
