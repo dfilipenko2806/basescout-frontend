@@ -256,18 +256,18 @@ export default function Profile() {
 
           <div className="flex items-center gap-4">
 
+            const REFERRAL_BASE = "https://basescout2026.xyz";
+
             <input
               type="text"
               readOnly
-              value={`https://basescout2026.vercel.app/?ref=${wallet.address}`}
+              value={`${REFERRAL_BASE}/?ref=${wallet.address}`}
               className="flex-1 bg-zinc-800 px-3 py-2 rounded text-sm text-zinc-400"
             />
 
             <button
               onClick={() => {
-                navigator.clipboard.writeText(
-                  `https://basescout2026.vercel.app/?ref=${wallet.address}`
-                );
+                navigator.clipboard.writeText(`${REFERRAL_BASE}/?ref=${wallet.address}`);
                 alert("Referral link copied!");
               }}
               className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
