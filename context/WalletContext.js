@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { connectWallet } from "../lib/ethers";
+import { connectWallet, getUserData } from "../lib/ethers";
 
 const WalletContext = createContext();
 
@@ -18,10 +18,18 @@ export function WalletProvider({ children }) {
   }, []);
 
   async function connect() {
-    const data = await connectWallet();
-    setWallet(data);
-
     try {
+      const data = await connectWallet(); // подключаем кошелёк
+      setWallet(data);
+
+      // 🔹 Получаем сумму поинтов из истории на бекенде
+      try {
+        const userData = await getUserData(data.address);
+        setWallet((prev) => ({ ...prev, points: userData.points }));
+      } catch (err) {
+        console.log("Failed to load user points:", err);
+      }
+
       const ref = localStorage.getItem("basescout_ref");
 
       if (ref && data?.address && ref !== data.address.toLowerCase()) {
@@ -35,8 +43,10 @@ export function WalletProvider({ children }) {
           })
         });
       }
+
     } catch (err) {
-      console.log("Referral register error", err);
+      console.error("Wallet connection error:", err);
+      throw err;
     }
   }
 
