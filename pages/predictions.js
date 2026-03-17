@@ -36,8 +36,7 @@ export default function Predictions() {
 
       const enriched = await Promise.all(
         data.map(async (p) => {
-          const expired = now > new Date(p.endDate);
-          let status = "Active";
+          let status = "Active"; // по умолчанию
           let userPlayed = false;
           let userChoice;
 
@@ -50,7 +49,7 @@ export default function Predictions() {
                   wallet.address,
                   p.contractId
                 );
-                userChoice = Number(choice); // 🔥 FIX: приведение BigInt к Number
+                userChoice = Number(choice);
               }
             } catch (err) {
               console.error("Contract played check error:", err);
@@ -68,22 +67,27 @@ export default function Predictions() {
             console.error("Contract results check error:", err);
           }
 
-          // ---- Логика отображения статуса ----
+          // ===== Логика фаз =====
+          const playDeadline = new Date(p.playDeadline);
+          const resolveTime = new Date(p.resolveTime);
+
           if (resolved) {
             if (userChoice != null) {
               status = userChoice === correctChoice ? "Win" : "Lose";
             } else {
               status = "Resolved";
             }
-          } else if (wallet?.address && userPlayed) {
-            // Статус Waiting только если кошелёк подключен
-            status = "Waiting";
+          } else if (now < playDeadline) {
+            status = "Active"; // можно играть
+          } else if (now >= playDeadline && now < resolveTime) {
+            status = "Waiting"; // участие закрыто, результат еще не готов
+          } else if (now >= resolveTime && !resolved) {
+            status = "Expired"; // время прошло, результат ещё не резолвнут
           }
 
           return {
             ...p,
             status,
-            expired,
             userPlayed,
             userChoice,
             userWon: status === "Win",
@@ -167,6 +171,7 @@ export default function Predictions() {
             if (p.status === "Waiting") bg = "bg-yellow-900";
             if (p.status === "Win") bg = "bg-green-700";
             if (p.status === "Lose") bg = "bg-red-700";
+            if (p.status === "Expired") bg = "bg-zinc-800";
 
             return (
               <div
@@ -180,7 +185,7 @@ export default function Predictions() {
                     : `Ends in: ${getTimeLeft(p.endDate)}`}
                 </div>
 
-                {!p.userPlayed && !p.resolved && wallet?.address && (
+                {!p.userPlayed && p.status === "Active" && wallet?.address && (
                   <div className="flex gap-4">
                     <button
                       disabled={txLoading}
@@ -216,6 +221,12 @@ export default function Predictions() {
                 {p.status === "Resolved" && (
                   <div className="font-medium text-zinc-400">
                     ✅ Prediction resolved
+                  </div>
+                )}
+
+                {p.status === "Expired" && (
+                  <div className="font-medium text-zinc-400">
+                    ⏳ Participation ended
                   </div>
                 )}
               </div>
