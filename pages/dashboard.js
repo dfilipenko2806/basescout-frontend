@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useWallet } from "../context/WalletContext";
-import { getUserOnchainData, doCheckIn, mintBadge } from "../lib/ethers";
+import { doCheckIn, mintBadge } from "../lib/ethers";
 import Link from "next/link";
 
 function Toast({ message, type, onClose }) {
