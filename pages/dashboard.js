@@ -32,6 +32,10 @@ export default function Dashboard() {
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // 🔥 NEW
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [canCheckIn, setCanCheckIn] = useState(true);
+
   const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const BADGE_LEVELS = [
@@ -61,13 +65,43 @@ export default function Dashboard() {
     load();
   }, [wallet]);
 
+  // 🔥 TIMER LOGIC
+  useEffect(() => {
+    if (!userData?.lastCheckIn) return;
+
+    const interval = setInterval(() => {
+      const now = Math.floor(Date.now() / 1000);
+      const nextCheckIn = userData.lastCheckIn + 86400;
+
+      const diff = nextCheckIn - now;
+
+      if (diff <= 0) {
+        setCanCheckIn(true);
+        setTimeLeft(0);
+      } else {
+        setCanCheckIn(false);
+        setTimeLeft(diff);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [userData]);
+
+  // 🔥 FORMAT TIME
+  function formatTime(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+
+    return `${h}h ${m}m ${s}s`;
+  }
+
   const refreshUser = async () => {
     if (!wallet) return;
     const data = await getUserOnchainData(wallet.address);
     setUserData(data);
   };
 
-  // Добавление записи в PointsHistory через backend
   const addPointsHistory = async (points) => {
     if (!wallet || points <= 0) return;
     try {
@@ -81,6 +115,7 @@ export default function Dashboard() {
     }
   };
 
+  // 🔥 FIXED CHECK-IN
   const handleCheckIn = async () => {
     try {
       setLoading(true);
@@ -88,9 +123,11 @@ export default function Dashboard() {
       const oldPoints = userData?.points || 0;
 
       await doCheckIn(wallet.signer);
-      await refreshUser();
 
-      const gained = (userData?.points || 0) - oldPoints;
+      const newData = await getUserOnchainData(wallet.address);
+      setUserData(newData);
+
+      const gained = (newData.points || 0) - oldPoints;
       if (gained > 0) {
         await addPointsHistory(gained);
       }
@@ -109,9 +146,11 @@ export default function Dashboard() {
       const oldPoints = userData?.points || 0;
 
       await mintBadge(wallet.signer, level);
-      await refreshUser();
 
-      const gained = (userData?.points || 0) - oldPoints;
+      const newData = await getUserOnchainData(wallet.address);
+      setUserData(newData);
+
+      const gained = (newData.points || 0) - oldPoints;
       if (gained > 0) {
         await addPointsHistory(gained);
       }
@@ -161,12 +200,19 @@ export default function Dashboard() {
           <p><span className="text-zinc-400">Badges:</span> {badges.length ? badges.join(", ") : "None"}</p>
         </div>
 
+        {/* 🔥 UPDATED BUTTON */}
         <button
-          disabled={loading}
+          disabled={!canCheckIn || loading}
           onClick={handleCheckIn}
-          className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-xl mb-10 font-semibold"
+          className={`px-6 py-3 rounded-xl mb-10 font-semibold transition ${
+            canCheckIn
+              ? "bg-green-600 hover:bg-green-700"
+              : "bg-zinc-700 cursor-not-allowed"
+          }`}
         >
-          Daily Check-In
+          {canCheckIn
+            ? "Daily Check-In"
+            : `Next check-in in ${formatTime(timeLeft)}`}
         </button>
 
         {nextBadge && (
