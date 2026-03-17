@@ -68,18 +68,17 @@ export default function Predictions() {
           const playDeadline = new Date(p.playDeadline);
           const resolveTime = new Date(p.resolveTime);
 
+          // ---- Логика отображения статуса ----
           if (resolved) {
             if (userChoice != null) {
               status = userChoice === correctChoice ? "Win" : "Lose";
             } else {
               status = "Resolved";
             }
-          } else if (now < playDeadline) {
-            status = "Active";
-          } else if (now >= playDeadline && now < resolveTime) {
-            status = "Waiting";
-          } else if (now >= resolveTime && !resolved) {
-            status = "Expired";
+          } else if (wallet?.address && userPlayed) {
+            status = "Waiting"; // пользователь сыграл, ждём результат
+          } else {
+            status = "Active"; // пользователь ещё не сыграл
           }
 
           return {
