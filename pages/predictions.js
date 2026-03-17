@@ -36,11 +36,10 @@ export default function Predictions() {
 
       const enriched = await Promise.all(
         data.map(async (p) => {
-          let status = "Active"; // по умолчанию
+          let status = "Active"; 
           let userPlayed = false;
           let userChoice;
 
-          // Проверяем сыграл ли пользователь только если кошелёк подключен
           if (wallet?.address) {
             try {
               userPlayed = await contract.played(wallet.address, p.contractId);
@@ -56,7 +55,6 @@ export default function Predictions() {
             }
           }
 
-          // Получаем результат с контракта
           let resolved = false;
           let correctChoice;
           try {
@@ -67,7 +65,6 @@ export default function Predictions() {
             console.error("Contract results check error:", err);
           }
 
-          // ===== Логика фаз =====
           const playDeadline = new Date(p.playDeadline);
           const resolveTime = new Date(p.resolveTime);
 
@@ -78,11 +75,11 @@ export default function Predictions() {
               status = "Resolved";
             }
           } else if (now < playDeadline) {
-            status = "Active"; // можно играть
+            status = "Active";
           } else if (now >= playDeadline && now < resolveTime) {
-            status = "Waiting"; // участие закрыто, результат еще не готов
+            status = "Waiting";
           } else if (now >= resolveTime && !resolved) {
-            status = "Expired"; // время прошло, результат ещё не резолвнут
+            status = "Expired";
           }
 
           return {
@@ -96,9 +93,22 @@ export default function Predictions() {
         })
       );
 
-      setPredictions(
-        enriched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      );
+      // ===== сортировка по фазам и участию пользователя =====
+      const sorted = enriched.sort((a, b) => {
+        const getRank = (p) => {
+          if (p.status === "Active") return 0;
+          if (p.status === "Waiting" && p.userPlayed) return 1;
+          if (p.status === "Waiting" && !p.userPlayed) return 2;
+          if ((p.status === "Win" || p.status === "Lose" || p.status === "Resolved") && p.userPlayed) return 3;
+          return 4; // завершённые, где не играл
+        };
+        const rankA = getRank(a);
+        const rankB = getRank(b);
+        if (rankA !== rankB) return rankA - rankB;
+        return new Date(b.createdAt) - new Date(a.createdAt); // внутри группы по дате
+      });
+
+      setPredictions(sorted);
     } catch (err) {
       console.error(err);
     }
