@@ -67,7 +67,7 @@ export default function Dashboard() {
 
   // 🔥 TIMER LOGIC
   useEffect(() => {
-    if (!userData?.lastCheckIn) return;
+    if (!userData) return;
 
     const interval = setInterval(() => {
       const now = Math.floor(Date.now() / 1000);
@@ -123,7 +123,9 @@ export default function Dashboard() {
       const oldPoints = userData?.points || 0;
 
       await doCheckIn(wallet.signer);
-
+      
+      await new Promise(res => setTimeout(res, 1500));
+      
       const newData = await getUserOnchainData(wallet.address);
       setUserData(newData);
 
